@@ -12,13 +12,7 @@ export default reactExtension(
 );
 
 function WineOptions() {
-  const handleViewInventory = () => {
-    window.location.href = "/tools/storage-inventory";
-  };
-
-  const handleSelectWines = () => {
-    window.location.href = "/tools/select-wines";
-  };
+  const { navigation } = useApi();
 
   return (
     <BlockStack spacing="loose">
@@ -26,8 +20,33 @@ function WineOptions() {
         columns={['1fr', '1fr']}
         spacing="loose"
       >
-        <Button onPress={handleSelectWines}>Select Wines for Shipping</Button>
-        <Button onPress={handleViewInventory}>Show Storage Inventory</Button>
+        <Button 
+          onPress={() =>
+            navigation.navigate({
+              target: "customer-account.page.render",
+              path: "/extensions/action-account-extension?mode=shipping",
+            })
+          }
+        >
+          Select Wines for Shipping
+        </Button>
+        <Button 
+          onPress={() =>
+            navigation.navigate({
+              target: "customer-account.page.render",
+              path: "/extensions/action-account-extension?mode=storage",
+            })
+          }
+        >
+          Show Storage Inventory
+        </Button>
+        <Button to="/actions?mode=shipping">
+          Select Wines for Shipping
+        </Button>
+
+        <Button to="/actions?mode=storage">
+          Show Storage Inventory
+        </Button>
       </Grid>
     </BlockStack>
   );
