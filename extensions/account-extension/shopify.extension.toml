@@ -16,8 +16,8 @@ uid = "1d111f87-03a1-825f-ba43-108d97e605b9d41c5a0b"
 # https://shopify.dev/docs/api/customer-account-ui-extensions/unstable/extension-targets-overview
 
 [[extensions.targeting]]
-module = "./src/OrderStatusBlock.jsx"
-target = "customer-account.order-status.block.render"
+module = "./src/OrderIndexBlock.jsx"
+target = "customer-account.order-index.block.render"
 
 [extensions.capabilities]
 # Gives your extension access to directly query Shopify’s storefront API.
