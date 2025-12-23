@@ -12,8 +12,6 @@ export default reactExtension(
 );
 
 function WineOptions() {
-  const { sessionToken } = useApi();
-
   const handleViewInventory = () => {
     window.location.href = "/tools/storage-inventory";
   };
