@@ -21,8 +21,6 @@ function ActionAccountExtension() {
   const { customer, location } = useApi();
 
   const customerId = customer?.id;
-  console.log("Customer ID:", customerId);
-
 
   const search = location?.search ?? "?mode=storage";
   let mode = null;
