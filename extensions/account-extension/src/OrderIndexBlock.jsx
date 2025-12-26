@@ -20,31 +20,11 @@ function WineOptions() {
         columns={['1fr', '1fr']}
         spacing="loose"
       >
-        <Button 
-          onPress={() =>
-            navigation.navigate({
-              target: "customer-account.page.render",
-              path: "/extensions/action-account-extension?mode=shipping",
-            })
-          }
-        >
-          Select Wines for Shipping
-        </Button>
-        <Button 
-          onPress={() =>
-            navigation.navigate({
-              target: "customer-account.page.render",
-              path: "/extensions/action-account-extension?mode=storage",
-            })
-          }
-        >
-          Show Storage Inventory
-        </Button>
-        <Button to="/actions?mode=shipping">
+        <Button to="/account/extensions/action-account-extension?mode=shipping">
           Select Wines for Shipping
         </Button>
 
-        <Button to="/actions?mode=storage">
+        <Button to="/account/extensions/action-account-extension?mode=storage">
           Show Storage Inventory
         </Button>
       </Grid>
