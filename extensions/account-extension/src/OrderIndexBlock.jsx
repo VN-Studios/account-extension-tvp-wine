@@ -6,43 +6,45 @@ import {
   InlineStack,
   Text,
   reactExtension,
-  useCustomer,
 } from "@shopify/ui-extensions-react/customer-account";
 import { Grid } from "@shopify/ui-extensions/checkout";
 import { useState, useEffect } from "react";
 
 export default reactExtension(
   "customer-account.order-index.block.render",
-  () => <WineOptions />
+  (api) => <WineOptions api={api} />
 );
 
-function WineOptions() {
+function WineOptions({api}) {
   const [auctions, setAuctions] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
-  const customer = useCustomer();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
 
   const fetchAuctions = async (page = 1) => {
-    if (!customer) {
+    const customerId = api.authenticatedAccount.customer.current.id;
+
+    if (!customerId) {
       setAuthenticated(false);
       setError("Customer not authenticated");
       return;
     }
+
+    const customerAuctionsUrlLambda = 'https://74391d056253.ngrok-free.app';
 
     setAuthenticated(true);
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch("https://lambda-url/get-auctions-by-customer", {
+      const res = await fetch(`${customerAuctionsUrlLambda}/get-auctions-by-customer`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json" 
         },
         body: JSON.stringify({
-          shopifyCustomerId: customer.id,
+          shopifyCustomerId: `gid://shopify/Customer/${customerId}`,
           page,
         }),
       });
@@ -82,23 +84,33 @@ function WineOptions() {
       <Text size="large" emphasis="bold">Auctions</Text>
       <Card>
         <BlockStack spacing="tight">
-          {!authenticated && <Text tone="critical">You must be logged in to view your auctions.</Text>}
-          {loading && <Text tone="subdued">Loading auctions...</Text>}
-          {error && <Text tone="critical">Error: {error}</Text>}
+          <BlockStack alignment="center" inlineAlignment="center" spacing="loose">
+            {!authenticated && (
+              <Text tone="critical">You must be logged in to view your auctions.</Text>
+            )}
+            {loading && (
+              <Text tone="subdued">Loading auctions...</Text>
+            )}
+            {error && (
+              <Text tone="critical">Error: {error}</Text>
+            )}
+          </BlockStack>
 
-          {auctions.length > 0 && (
+          {!loading && auctions.length > 0 ? (
             <>
               <Grid columns={['0.01fr', '1fr', '2fr', '1fr','1fr', '0.01fr']} spacing="tight">
                 <Text /> <Text /> <Text /> <Text /> <Text /> <Text />
                 <Text /> <Text /> <Text /> <Text /> <Text /> <Text />
               </Grid>
 
-              <Grid columns={['0.01fr', '1fr', '2fr', '1fr','1fr', '0.01fr']} spacing="loose">
+              <Grid columns={['0.01fr', '1.5fr', '2fr', '1fr','0.5fr', '0.01fr']} spacing="loose">
                 <Text /> 
                 <Text size="medium" emphasis="bold"># Auction</Text>
                 <Text size="medium" emphasis="bold">Product Name</Text>
                 <Text size="medium" emphasis="bold">Status</Text>
-                <Text size="medium" emphasis="bold">Action</Text>
+                <BlockStack alignment="center" inlineAlignment="center">
+                  <Text size="medium" emphasis="bold">Action</Text>
+                </BlockStack>
                 <Text />
               </Grid>
 
@@ -107,13 +119,13 @@ function WineOptions() {
               </Grid>
 
               {auctions.map((auction, index) => (
-                <Grid key={index} columns={['0.01fr', '1fr', '2fr', '1fr','1fr', '0.01fr']} spacing="loose">
+                <Grid key={index} columns={['0.01fr', '1.5fr', '2fr', '1fr','0.5fr', '0.01fr']} spacing="loose">
                   <Text />
                   <InlineStack spacing="tight">
                     <Text>{auction.auction_id}</Text>
-                    <Badge tone={auction.status === 'ORDER PAID' ? 'success' : 'critical'}>
+                    <Badge tone={auction.status === 'ORDER PAID' ? 'success' : (auction.status === 'SUBSCRIPTION CREATED'? 'critical': 'subdued')}>
                       {auction.status === 'ORDER PAID' ? 'Marked as Ship' : (auction.status === 'SUBSCRIPTION CREATED'? 'Marked as Storage': auction.status)}
-                    </Badge>
+                    </Badge>                    
                   </InlineStack>
                   <Text>
                     {auction.data_webkul.product_title} 
@@ -122,7 +134,9 @@ function WineOptions() {
                   {auction.status === 'SUBSCRIPTION CREATED' ? (
                     <Button kind="plain" onPress={() => handleShip(auction.auction_id)}>Ship</Button>
                   ) : (
-                    <Text>N/A</Text>
+                    <BlockStack alignment="center" inlineAlignment="center">
+                      <Text>N/A</Text>
+                    </BlockStack>
                   )}
                   <Text />
                 </Grid>
@@ -155,6 +169,10 @@ function WineOptions() {
                 <Text /> 
               </Grid>
             </>
+          ) : (
+            authenticated && !loading && !error && (
+              <Text tone="subdued">No auctions found.</Text>
+            )
           )}
         </BlockStack>
       </Card>
