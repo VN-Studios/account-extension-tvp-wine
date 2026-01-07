@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   InlineStack,
+  Link,
   Text,
   reactExtension,
 } from "@shopify/ui-extensions-react/customer-account";
@@ -21,6 +22,15 @@ function WineOptions({api}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
+  
+  const orderAuctionUrlLambda = 'https://nywaa.myshopify.com/pages/order-action-landing';
+
+  const AUCTION_STATUS = {
+    NOTIFIED: "NOTIFIED",
+    SUBSCRIPTION_CREATED: "SUBSCRIPTION CREATED",
+    ORDER_CREATED: "ORDER CREATED",
+    ORDER_PAID: "ORDER PAID",
+  };
 
   const fetchAuctions = async (page = 1) => {
     const customerId = api.authenticatedAccount.customer.current.id;
@@ -31,7 +41,7 @@ function WineOptions({api}) {
       return;
     }
 
-    const customerAuctionsUrlLambda = 'https://74391d056253.ngrok-free.app';
+    const customerAuctionsUrlLambda = 'https://abd19aaa6fac.ngrok-free.app';
 
     setAuthenticated(true);
     setLoading(true);
@@ -67,18 +77,6 @@ function WineOptions({api}) {
     fetchAuctions(1);
   }, []);
 
-  const handleShip = async (auctionId) => {
-    try {
-      await fetch(`https://lambda-url.com/auctions/${auctionId}/ship`, {
-        method: "POST",
-      });
-
-      fetchAuctions(pagination.page);
-    } catch (err) {
-      console.error("Error shipping auction:", err);
-    }
-  };
-
   return (
     <BlockStack spacing="loose">
       <Text size="large" emphasis="bold">Auctions</Text>
@@ -103,7 +101,7 @@ function WineOptions({api}) {
                 <Text /> <Text /> <Text /> <Text /> <Text /> <Text />
               </Grid>
 
-              <Grid columns={['0.01fr', '1.5fr', '2fr', '1fr','0.5fr', '0.01fr']} spacing="loose">
+              <Grid columns={['0.01fr', '1.5fr', '2fr', '1fr','0.7fr', '0.01fr']} spacing="loose">
                 <Text /> 
                 <Text size="medium" emphasis="bold"># Auction</Text>
                 <Text size="medium" emphasis="bold">Product Name</Text>
@@ -119,24 +117,63 @@ function WineOptions({api}) {
               </Grid>
 
               {auctions.map((auction, index) => (
-                <Grid key={index} columns={['0.01fr', '1.5fr', '2fr', '1fr','0.5fr', '0.01fr']} spacing="loose">
+                <Grid key={index} columns={['0.01fr', '1.5fr', '2fr', '1fr','0.7fr', '0.01fr']} spacing="loose">
                   <Text />
                   <InlineStack spacing="tight">
                     <Text>{auction.auction_id}</Text>
-                    <Badge tone={auction.status === 'ORDER PAID' ? 'success' : (auction.status === 'SUBSCRIPTION CREATED'? 'critical': 'subdued')}>
-                      {auction.status === 'ORDER PAID' ? 'Marked as Ship' : (auction.status === 'SUBSCRIPTION CREATED'? 'Marked as Storage': auction.status)}
-                    </Badge>                    
+                    {auction.status !== AUCTION_STATUS.NOTIFIED && (
+                      <Badge tone={auction.status === AUCTION_STATUS.ORDER_PAID ? 'success' : (auction.status === AUCTION_STATUS.SUBSCRIPTION_CREATED ? 'critical' : 'subdued')}>
+                        {auction.status === AUCTION_STATUS.ORDER_PAID ? 'Marked as Ship' : (auction.status === AUCTION_STATUS.SUBSCRIPTION_CREATED ? 'Marked as Storage' : 'Complete the shipping process')}
+                      </Badge>
+                    )}
                   </InlineStack>
                   <Text>
                     {auction.data_webkul.product_title} 
                   </Text>
                   <Text>{auction.status}</Text>
-                  {auction.status === 'SUBSCRIPTION CREATED' ? (
-                    <Button kind="plain" onPress={() => handleShip(auction.auction_id)}>Ship</Button>
-                  ) : (
+                  {auction.status === AUCTION_STATUS.SUBSCRIPTION_CREATED ? (
                     <BlockStack alignment="center" inlineAlignment="center">
-                      <Text>N/A</Text>
+                      <Link
+                        to={`${orderAuctionUrlLambda}/create-order?auction=${auction.auction_id}`}
+                        target="_blank"
+                      >
+                        <Button kind="plain">Ship</Button>
+                      </Link>
                     </BlockStack>
+                  ) : (
+                    auction.status === AUCTION_STATUS.ORDER_CREATED ? (
+                      <BlockStack alignment="center" inlineAlignment="center">
+                        <Link
+                        to={`${orderAuctionUrlLambda}/create-order?auction=${auction.auction_id}`}
+                        target="_self"
+                      >
+                        <Button kind="plain">Go To Checkout</Button>
+                      </Link>
+                      </BlockStack>
+                    ) : (
+                      auction.status === AUCTION_STATUS.NOTIFIED ? (
+                        <Grid key={index} columns={['1fr','1fr']} spacing="loose">
+                          <Link
+                            to={`${orderAuctionUrlLambda}/create-order?auction=${auction.auction_id}`}
+                            target="_self"
+                          >
+                            <BlockStack alignment="center" inlineAlignment="center">
+                              <Button kind="plain">Ship</Button>
+                            </BlockStack>
+                          </Link>
+                          <Link
+                            to={`${orderAuctionUrlLambda}/create-subscription?auction=${auction.auction_id}`}
+                            target="_self"
+                          >
+                            <Button kind="plain">Storage</Button>
+                          </Link>
+                        </Grid>
+                      ) : (
+                        <BlockStack alignment="center" inlineAlignment="center">
+                          <Text>N/A</Text>
+                        </BlockStack>
+                      )
+                    )
                   )}
                   <Text />
                 </Grid>
