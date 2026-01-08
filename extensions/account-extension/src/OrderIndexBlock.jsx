@@ -41,7 +41,7 @@ function WineOptions({api}) {
       return;
     }
 
-    const customerAuctionsUrlLambda = 'https://abd19aaa6fac.ngrok-free.app';
+    const customerAuctionsUrlLambda = 'https://6scroyaa4klqxi7spiah3rxgwq0ztdnl.lambda-url.us-east-1.on.aws';
 
     setAuthenticated(true);
     setLoading(true);
